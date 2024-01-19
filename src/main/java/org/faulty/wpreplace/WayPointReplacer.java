@@ -51,7 +51,7 @@ public class WayPointReplacer {
         log.info("Converting mission file:");
         LuaValue missionObject = loadMissionFromEntry(zipInputStream);
         LuaTable groups = getGroups(missionObject);
-        LuaValue route = groups.get(1).get("route");
+        LuaValue route = groups.get(getEnvIntOrDefault("sourceGroup", 1)).get("route");
         log.info("|--- Rewriting all groups");
         for (int i = 1; i <= groups.len().toint(); i++) {
             groups.get(i).set("route", route);
