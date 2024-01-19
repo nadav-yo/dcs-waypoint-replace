@@ -1,12 +1,12 @@
 package org.faulty.wpreplace;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 
+@NoArgsConstructor(access = AccessLevel.NONE)
 public final class LuaWriter {
-    private LuaWriter() {
-        // this is a helper class
-    }
 
     static String luaTableToString(LuaTable table, int depth) {
         StringBuilder scriptBuilder = new StringBuilder();

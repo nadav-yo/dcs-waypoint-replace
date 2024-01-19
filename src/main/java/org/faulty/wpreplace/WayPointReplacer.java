@@ -2,13 +2,13 @@ package org.faulty.wpreplace;
 
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.IOUtils;
-import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
-import org.luaj.vm2.lib.jse.JsePlatform;
 
-import java.io.*;
-import java.nio.charset.Charset;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -21,16 +21,12 @@ public class WayPointReplacer {
             System.exit(1);
         }
         String mizFilePath = args[0];
-        File file = new File(mizFilePath);
-        String destFilePath = getEnvOrDefault("outputFile", file.getParent() + File.separator + "new_" + file.getName());
-        log.info("Converting {} to {}:", mizFilePath, destFilePath);
+        File destFile = getDestFile(mizFilePath);
+        log.info("Converting {} to {}:", mizFilePath, destFile);
 
-        File destFile = new File(destFilePath);
         try {
-            try (FileInputStream fileInputStream = new FileInputStream(mizFilePath);
-                 ZipInputStream zipInputStream = new ZipInputStream(fileInputStream)) {
-                try (FileOutputStream tempFileOutputStream = new FileOutputStream(destFile);
-                     ZipOutputStream zipOutputStream = new ZipOutputStream(tempFileOutputStream)) {
+            try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(mizFilePath))) {
+                try (ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(destFile))) {
                     ZipEntry entry;
                     while ((entry = zipInputStream.getNextEntry()) != null) {
                         if (entry.getName().equals("mission")) {
@@ -47,11 +43,18 @@ public class WayPointReplacer {
         }
     }
 
+    private static File getDestFile(String mizFilePath) {
+        File file = new File(mizFilePath);
+        String outputFile = EnvUtils.getEnvOrDefault("outputFile", file.getParent() + File.separator + "new_" + file.getName());
+        return new File(outputFile);
+    }
+
     private static void replaceMissionFile(ZipInputStream zipInputStream, ZipOutputStream zipOutputStream) throws IOException {
         log.info("Converting mission file:");
-        LuaValue missionObject = loadMissionFromEntry(zipInputStream);
+        log.info("|--- Loading mission file");
+        LuaValue missionObject = LuaReader.loadMissionFromEntry(zipInputStream);
         LuaTable groups = getGroups(missionObject);
-        LuaValue route = groups.get(getEnvIntOrDefault("sourceGroup", 1)).get("route");
+        LuaValue route = groups.get(EnvUtils.getEnvIntOrDefault("sourceGroup", 1)).get("route");
         log.info("|--- Rewriting all groups");
         for (int i = 1; i <= groups.len().toint(); i++) {
             groups.get(i).set("route", route);
@@ -63,11 +66,7 @@ public class WayPointReplacer {
     private static void copyEntry(ZipEntry entry, ZipOutputStream zipOutputStream, ZipInputStream zipInputStream) throws IOException {
         log.info("Copying file {}", entry.getName());
         zipOutputStream.putNextEntry(entry);
-        byte[] buffer = new byte[1024];
-        int bytesRead;
-        while ((bytesRead = zipInputStream.read(buffer)) != -1) {
-            zipOutputStream.write(buffer, 0, bytesRead);
-        }
+        IOUtils.copy(zipInputStream, zipOutputStream);
         zipOutputStream.closeEntry();
     }
 
@@ -80,41 +79,13 @@ public class WayPointReplacer {
         zipOutputStream.closeEntry();
     }
 
-    private static LuaValue loadMissionFromEntry(ZipInputStream zipInputStream) throws IOException {
-        log.info("|--- Loading mission file");
-        String luaScript = IOUtils.toString(zipInputStream, Charset.defaultCharset());
-        luaScript += "\nreturn mission";
-        return loadMission(luaScript);
-    }
-
     private static LuaTable getGroups(LuaValue missionObject) {
         return missionObject
                 .get("coalition").checktable()
                 .get("blue").checktable()
                 .get("country").checktable()
-                .get(getEnvIntOrDefault("countryId", 1)).checktable()
-                .get(getEnvOrDefault("unitType", "plane")).checktable()
+                .get(EnvUtils.getEnvIntOrDefault("countryId", 1)).checktable()
+                .get(EnvUtils.getEnvOrDefault("unitType", "plane")).checktable()
                 .get("group").checktable();
-    }
-
-    private static String getEnvOrDefault(String variableName, String defaultValue) {
-        String value = System.getProperty(variableName);
-        return (value != null && !value.isEmpty()) ? value : defaultValue;
-    }
-
-    private static int getEnvIntOrDefault(String variableName, int defaultValue) {
-        String unitCountString = System.getProperty(variableName);
-        try {
-            return (unitCountString != null && !unitCountString.isEmpty()) ? Integer.parseInt(unitCountString) : defaultValue;
-        } catch (NumberFormatException e) {
-            System.err.println("Error parsing unitcount. Using default value.");
-            return defaultValue;
-        }
-    }
-
-    private static LuaValue loadMission(String luaScript) {
-        Globals globals = JsePlatform.standardGlobals();
-        LuaValue chunk = globals.load(new ByteArrayInputStream(luaScript.getBytes()), "mission", "bt", globals);
-        return chunk.checkfunction().call();
     }
 }

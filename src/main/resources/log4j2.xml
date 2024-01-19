@@ -2,7 +2,7 @@
 <Configuration>
     <Appenders>
         <Console name="Console">
-            <PatternLayout disableAnsi="false" pattern="%d{HH:mm:ss.SSS} %highlight{%-5level} %c{1} - %msg%n"/>
+            <PatternLayout disableAnsi="false" pattern="%d{HH:mm:ss.SSS} %highlight{%-5level} %-16c{1} - %msg%n"/>
         </Console>
     </Appenders>
     <Loggers>
