@@ -3,16 +3,16 @@ name: Java CI with Maven
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
 
 jobs:
   build:
-
+    name: Build ${{ github.run_number }}
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Required due to the way Git works, without it this action won't be able to find any or the correct tags
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
@@ -23,13 +23,3 @@ jobs:
         run: mvn -B package --file pom.xml
       - name: Test with Maven
         run: mvn test
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false

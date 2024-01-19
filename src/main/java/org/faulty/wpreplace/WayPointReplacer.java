@@ -2,7 +2,9 @@ package org.faulty.wpreplace;
 
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.IOUtils;
-import org.luaj.vm2.*;
+import org.luaj.vm2.Globals;
+import org.luaj.vm2.LuaTable;
+import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.jse.JsePlatform;
 
 import java.io.*;
@@ -20,7 +22,7 @@ public class WayPointReplacer {
         }
         String mizFilePath = args[0];
         File file = new File(mizFilePath);
-        String destFilePath = file.getParent() + File.separator + "new_" + file.getName();
+        String destFilePath = getEnvOrDefault("outputFile", file.getParent() + File.separator + "new_" + file.getName());
         log.info("Converting {} to {}:", mizFilePath, destFilePath);
 
         File destFile = new File(destFilePath);
@@ -70,7 +72,7 @@ public class WayPointReplacer {
     }
 
     private static void writeModifiedMissionEntry(LuaValue missionObject, ZipOutputStream zipOutputStream) throws IOException {
-        String missionStr = "mission = \n" + LuaWriter.luaTableToString(missionObject.checktable(),1);
+        String missionStr = "mission = \n" + LuaWriter.luaTableToString(missionObject.checktable(), 1);
         log.info("|--- Writing modified mission file");
         ZipEntry entry = new ZipEntry("mission");
         zipOutputStream.putNextEntry(entry);
@@ -90,9 +92,24 @@ public class WayPointReplacer {
                 .get("coalition").checktable()
                 .get("blue").checktable()
                 .get("country").checktable()
-                .get(1).checktable()
-                .get("plane").checktable()
+                .get(getEnvIntOrDefault("countryId", 1)).checktable()
+                .get(getEnvOrDefault("unitType", "plane")).checktable()
                 .get("group").checktable();
+    }
+
+    private static String getEnvOrDefault(String variableName, String defaultValue) {
+        String value = System.getProperty(variableName);
+        return (value != null && !value.isEmpty()) ? value : defaultValue;
+    }
+
+    private static int getEnvIntOrDefault(String variableName, int defaultValue) {
+        String unitCountString = System.getProperty(variableName);
+        try {
+            return (unitCountString != null && !unitCountString.isEmpty()) ? Integer.parseInt(unitCountString) : defaultValue;
+        } catch (NumberFormatException e) {
+            System.err.println("Error parsing unitcount. Using default value.");
+            return defaultValue;
+        }
     }
 
     private static LuaValue loadMission(String luaScript) {
