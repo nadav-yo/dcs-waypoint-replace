@@ -1,4 +1,4 @@
-package org.faulty.wpreplace;
+package org.faulty.wpreplace.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -8,7 +8,10 @@ import org.luaj.vm2.LuaValue;
 @NoArgsConstructor(access = AccessLevel.NONE)
 public final class LuaWriter {
 
-    static String luaTableToString(LuaTable table, int depth) {
+    public static String luaTableToString(LuaTable table) {
+        return luaTableToString(table, 1);
+    }
+    private static String luaTableToString(LuaTable table, int depth) {
         StringBuilder scriptBuilder = new StringBuilder();
         scriptBuilder.append("\t".repeat(Math.max(0, depth - 1)));
         scriptBuilder.append("{\n");

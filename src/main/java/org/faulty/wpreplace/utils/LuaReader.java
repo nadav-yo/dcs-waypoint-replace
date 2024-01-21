@@ -1,4 +1,4 @@
-package org.faulty.wpreplace;
+package org.faulty.wpreplace.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -15,7 +15,7 @@ import java.util.zip.ZipInputStream;
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class LuaReader {
 
-    static LuaValue loadMissionFromEntry(ZipInputStream zipInputStream) throws IOException {
+    public static LuaValue loadMissionFromEntry(ZipInputStream zipInputStream) throws IOException {
         String luaScript = IOUtils.toString(zipInputStream, Charset.defaultCharset());
         luaScript += "\nreturn mission";
         return loadMission(luaScript);

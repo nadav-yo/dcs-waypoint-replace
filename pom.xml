@@ -12,6 +12,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring-shell.version>3.2.0</spring-shell.version>
     </properties>
 
     <dependencies>
@@ -41,34 +42,30 @@
             <version>1.18.30</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.shell</groupId>
+            <artifactId>spring-shell-starter-jna</artifactId>
+            <version>3.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jline</groupId>
+            <artifactId>jline-terminal-jna</artifactId>
+            <version>3.24.1</version>
+        </dependency>
     </dependencies>
-
     <build>
         <plugins>
-            <!-- Use the maven-assembly-plugin to create a standalone JAR with dependencies -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.3.0</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.2.2</version>
                 <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>org.faulty.wpreplace.WayPointReplacer</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <!-- Include project dependencies in the JAR -->
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <finalName>${project.artifactId}-${project.version}</finalName>
-                    <!-- Append 'jar-with-dependencies' to the final name to avoid overwriting the default JAR -->
-                    <appendAssemblyId>false</appendAssemblyId>
+                    <executable>true</executable>
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>repackage</goal>
                         </goals>
                     </execution>
                 </executions>
