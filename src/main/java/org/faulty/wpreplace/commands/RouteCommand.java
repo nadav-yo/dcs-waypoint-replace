@@ -1,13 +1,11 @@
 package org.faulty.wpreplace.commands;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.faulty.wpreplace.context.MissionMizService;
 import org.faulty.wpreplace.context.RouteContext;
 import org.faulty.wpreplace.utils.LuaWriter;
 import org.faulty.wpreplace.utils.RouteUtils;
-import org.luaj.vm2.LuaString;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +23,7 @@ public class RouteCommand extends BaseCommand {
     private RouteContext routeContext;
 
     @ShellMethodAvailability("isMissionLoaded")
-    @ShellMethod(key = "route get", value = "Single selector", group = "Route")
+    @ShellMethod(key = "route get", value = "Select a source route", group = "Route")
     public String routeGet() {
         String coalition = getCoalition();
         int countryId = getIntInput("country id:", "1");
@@ -41,27 +39,15 @@ public class RouteCommand extends BaseCommand {
     }
 
     @ShellMethodAvailability("isMissionAndRouteLoaded")
-    @ShellMethod(key = "route show", value = "Multi selector", group = "Route")
+    @ShellMethod(key = "route show", value = "Show source route coordinates", group = "Route")
     public String showRoute() {
         LuaTable route = routeContext.getRoute().get("points").checktable();
-        return "Showing results for " + routeContext.printDetails() + "\n"
-                + LuaWriter.luaTableToString(compactPoints(route));
-    }
-
-    public LuaTable compactPoints(LuaTable points) {
-        List<LuaValue> newPoints = new ArrayList<>();
-        for (LuaValue key : points.keys()) {
-            LuaString point = LuaString.valueOf(String.format("x=%s, y=%s, alt=%s",
-                    points.get(key).get("x"),
-                    points.get(key).get("y"),
-                    points.get(key).get("alt")));
-            newPoints.add(point);
-        }
-        return LuaValue.listOf(newPoints.toArray(new LuaValue[] {}));
+        return String.format("Showing %d points for %s\n%s", route.length(), routeContext.printDetails(),
+                LuaWriter.luaTableToString(RouteUtils.compactPoints(route)));
     }
 
     @ShellMethodAvailability("isMissionAndRouteLoaded")
-    @ShellMethod(key = "route copy", value = "Multi selector", group = "Route")
+    @ShellMethod(key = "route copy", value = "Copy source route to choosen destinations", group = "Route")
     public String routeCopy() {
         String coalition = getCoalition();
         int countryId = Integer.parseInt(getStringInput("country id:", "1"));
@@ -69,8 +55,10 @@ public class RouteCommand extends BaseCommand {
         if (unitTypes.isEmpty()) {
             return "No units selected";
         }
-        unitTypes.forEach(unitType -> RouteUtils.setRoute(missionContext.getMission(), routeContext.getRoute(), coalition, countryId, unitType));
-        return String.format("Route set for coalition %s, country %d, units '%s'", coalition, countryId, String.join(",", unitTypes));
+        unitTypes.forEach(unitType -> RouteUtils.setRoute(missionContext.getMission(), routeContext.getRoute(),
+                coalition, countryId, unitType));
+        return String.format("Route set for coalition %s, country %d, units '%s'", coalition, countryId,
+                String.join(",", unitTypes));
     }
 
     private Availability isMissionLoaded() {

@@ -16,7 +16,7 @@ Before running the script, ensure that you have the following:
 To run the script, use the following command:
 
 ```bash
-java -jar waypoint-replace-0.0.8.jar
+java -jar waypoint-replace-0.0.9.jar
 ```
 <b> Note! <br/>
 * Replace 0.0.8 with the actual version downloaded

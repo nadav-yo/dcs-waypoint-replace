@@ -1,5 +1,9 @@
 package org.faulty.wpreplace.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.luaj.vm2.LuaString;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 
@@ -30,4 +34,20 @@ public final class RouteUtils {
             }
         }
     }
+
+    /**
+     * Compact a route points to x,y,alt only
+     */
+    public static LuaTable compactPoints(LuaTable points) {
+        List<LuaValue> newPoints = new ArrayList<>();
+        for (LuaValue key : points.keys()) {
+            LuaString point = LuaString.valueOf(String.format("x=%s, y=%s, alt=%s",
+                    points.get(key).get("x"),
+                    points.get(key).get("y"),
+                    points.get(key).get("alt")));
+            newPoints.add(point);
+        }
+        return LuaValue.listOf(newPoints.toArray(new LuaValue[] {}));
+    }
+
 }
