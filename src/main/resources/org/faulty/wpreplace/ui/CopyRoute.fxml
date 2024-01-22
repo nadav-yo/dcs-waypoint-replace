@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.*?>
+<StackPane xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.faulty.wpreplace.ui.CopyRouteController">
+
+    <VBox alignment="CENTER" prefHeight="479.0" prefWidth="200.0" spacing="10">
+        <Text fx:id="routeDetails"/>
+        <HBox alignment="CENTER" spacing="10">
+            <Text text="Coalition"/>
+            <RadioButton fx:id="blueRadioButton" text="Blue" userData="blue"/>
+            <RadioButton fx:id="redRadioButton" text="Red" userData="red"/>
+        </HBox>
+
+        <Text text="Country ID"/>
+        <ListView fx:id="countryIdListView" prefHeight="100" prefWidth="150"/>
+        <Separator prefWidth="200.0"/>
+
+        <HBox alignment="CENTER" spacing="10">
+            <Text text="Unit Type"/>
+            <RadioButton fx:id="planeRadioButton" text="Plane" userData="plane"/>
+            <RadioButton fx:id="helicopterRadioButton" text="Helicopter" userData="helicopter"/>
+        </HBox>
+
+        <Text text="Group ID"/>
+        <ListView fx:id="groupIdListView" prefHeight="100" prefWidth="150"/>
+        <Button fx:id="copyButton" onAction="#copyRouteData" text="Copy"/>
+    </VBox>
+</StackPane>

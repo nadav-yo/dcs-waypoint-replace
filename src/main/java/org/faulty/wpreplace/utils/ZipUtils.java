@@ -1,5 +1,7 @@
 package org.faulty.wpreplace.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.IOUtils;
 import org.luaj.vm2.LuaValue;
@@ -10,6 +12,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 @Log4j2
+@NoArgsConstructor(access = AccessLevel.NONE)
 public class ZipUtils {
 
     public static void copyEntry(ZipEntry entry, ZipOutputStream zipOutputStream, ZipInputStream zipInputStream) throws IOException {

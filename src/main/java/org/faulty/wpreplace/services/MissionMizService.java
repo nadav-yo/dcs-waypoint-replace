@@ -1,8 +1,9 @@
-package org.faulty.wpreplace.context;
+package org.faulty.wpreplace.services;
 
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.IOUtils;
+import org.faulty.wpreplace.models.Error;
 import org.faulty.wpreplace.utils.LuaReader;
 import org.faulty.wpreplace.utils.ZipUtils;
 import org.luaj.vm2.LuaValue;
@@ -62,9 +63,5 @@ public class MissionMizService {
             log.error("Conversion failed due to:", e);
             return new Error("Failed to save file due to " + e.getMessage());
         }
-    }
-
-    public boolean isMissionLoaded() {
-        return mission != null;
     }
 }
