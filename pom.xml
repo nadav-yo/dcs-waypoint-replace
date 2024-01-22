@@ -49,11 +49,6 @@
             <version>${spring.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.jline</groupId>
-            <artifactId>jline-terminal-jna</artifactId>
-            <version>3.24.1</version>
-        </dependency>
-        <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${javfx.version}</version>

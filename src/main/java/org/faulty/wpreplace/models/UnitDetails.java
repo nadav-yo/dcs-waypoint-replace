@@ -4,6 +4,8 @@ import lombok.Data;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +19,8 @@ public class UnitDetails {
     private final float x;
     private final float y;
     private final int alt;
-    private final float heading;
+    private final BigDecimal heading;
+    private final float speed;
     private final LuaTable luaUnit;
 
     public static List<UnitDetails> fromLuaGroup(LuaTable luaGroup) {
@@ -34,7 +37,8 @@ public class UnitDetails {
                     luaUnit.get("x").tofloat(),
                     luaUnit.get("y").tofloat(),
                     luaUnit.get("alt").toint(),
-                    luaUnit.get("heading").tofloat(),
+                    BigDecimal.valueOf(Math.toDegrees(luaUnit.get("heading").tofloat())).setScale(1, RoundingMode.HALF_UP),
+                    luaUnit.get("speed").tofloat(),
                     luaUnit)
             );
         }
@@ -42,7 +46,11 @@ public class UnitDetails {
     }
 
     private static String getCallsigns(LuaTable luaGroup) {
-        LuaTable callsign = luaGroup.get("callsign").checktable();
+        LuaValue callsignVal = luaGroup.get("callsign");
+        if (callsignVal.isint()) {
+            return Integer.toString(callsignVal.toint());
+        }
+        LuaTable callsign = callsignVal.checktable();
         List<String> callSigns = new ArrayList<>();
         for (LuaValue key : callsign.keys()) {
             if (callsign.get(key).isstring()) {

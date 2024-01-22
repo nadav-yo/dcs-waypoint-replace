@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 
 @Log4j2
 @Component
@@ -66,13 +67,15 @@ public class GroupDetailsController {
         yColumn.setCellValueFactory(new PropertyValueFactory<>("y"));
         TableColumn<UnitDetails, Integer> altColumn = new TableColumn<>("Alt");
         altColumn.setCellValueFactory(new PropertyValueFactory<>("alt"));
-        TableColumn<UnitDetails, Float> headingColumn = new TableColumn<>("Heading");
+        TableColumn<UnitDetails, BigDecimal> headingColumn = new TableColumn<>("Heading");
         headingColumn.setCellValueFactory(new PropertyValueFactory<>("heading"));
+        TableColumn<UnitDetails, Float> speedColumn = new TableColumn<>("Speed");
+        speedColumn.setCellValueFactory(new PropertyValueFactory<>("speed"));
 
         TableColumn<UnitDetails, Void> viewColumn = new TableColumn<>("View Payload");
         viewColumn.setCellFactory(createButtonCellFactory());
 
-        dataTable.getColumns().addAll(idColumn, nameColumn, skillColumn, callSignsColumn, unitColumn, xColumn, yColumn, altColumn, headingColumn, viewColumn);
+        dataTable.getColumns().addAll(idColumn, nameColumn, skillColumn, callSignsColumn, unitColumn, xColumn, yColumn, altColumn, headingColumn, speedColumn, viewColumn);
 
         dataTable.setItems(routes);
         idColumn.setSortType(TableColumn.SortType.ASCENDING);
