@@ -54,6 +54,7 @@ public class LoadMissionController {
         stage.setTitle("Source Details");
         stage.setScene(new Scene(root, 800, 600));
         Stage currentStage = (Stage) messageText.getScene().getWindow();
+        App.addIcons(stage);
         currentStage.hide();
 
         stage.show();

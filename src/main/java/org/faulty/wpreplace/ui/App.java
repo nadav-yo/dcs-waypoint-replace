@@ -3,6 +3,7 @@ package org.faulty.wpreplace.ui;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
@@ -24,7 +25,14 @@ public class App extends Application {
         Scene scene = new Scene(fxmlLoader.load(), 320, 240);
         primaryStage.setTitle("Select Source Mission");
         primaryStage.setScene(scene);
+        addIcons(primaryStage);
         primaryStage.show();
+    }
+
+    public static void addIcons(Stage stage) {
+        stage.getIcons().add(new Image("/org/faulty/wpreplace/ui/icon256.ico"));
+        stage.getIcons().add(new Image("/org/faulty/wpreplace/ui/icon48.png"));
+        stage.getIcons().add(new Image("/org/faulty/wpreplace/ui/icon32.png"));
     }
 
 

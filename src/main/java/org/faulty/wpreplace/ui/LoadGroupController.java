@@ -250,7 +250,8 @@ public class LoadGroupController {
             groupDetailsController.setGroup(coalition, countryId, unitType, groupId);
             Stage stage = new Stage();
             stage.setTitle("Group Details");
-            stage.setScene(new Scene(root, 800, 600));
+            stage.setScene(new Scene(root, 1024, 600));
+            App.addIcons(stage);
             stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);

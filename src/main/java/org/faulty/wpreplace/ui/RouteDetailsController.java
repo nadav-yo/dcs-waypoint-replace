@@ -58,6 +58,7 @@ public class RouteDetailsController {
             Stage stage = new Stage();
             stage.setTitle("Copy Route to destinations");
             stage.setScene(new Scene(root, 400, 300));
+            App.addIcons(stage);
             stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);

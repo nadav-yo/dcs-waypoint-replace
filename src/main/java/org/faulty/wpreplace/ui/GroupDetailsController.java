@@ -16,8 +16,10 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import lombok.extern.log4j.Log4j2;
+import org.faulty.wpreplace.models.UnitDataLink;
 import org.faulty.wpreplace.models.UnitDetails;
 import org.faulty.wpreplace.models.UnitPayload;
+import org.faulty.wpreplace.models.UnitRadio;
 import org.faulty.wpreplace.services.MissionMizService;
 import org.faulty.wpreplace.utils.MessageUtils;
 import org.faulty.wpreplace.utils.RouteUtils;
@@ -27,6 +29,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URL;
+import java.util.function.BiConsumer;
 
 @Log4j2
 @Component
@@ -72,10 +76,20 @@ public class GroupDetailsController {
         TableColumn<UnitDetails, Float> speedColumn = new TableColumn<>("Speed");
         speedColumn.setCellValueFactory(new PropertyValueFactory<>("speed"));
 
-        TableColumn<UnitDetails, Void> viewColumn = new TableColumn<>("View Payload");
-        viewColumn.setCellFactory(createButtonCellFactory());
+        TableColumn<UnitDetails, Void> viewPayload = new TableColumn<>("Payload");
+        viewPayload.setCellFactory(createButtonCellFactory("View Payload",
+                getClass().getResource("PayloadDetails.fxml"), this::viewPayloadButtonClick));
 
-        dataTable.getColumns().addAll(idColumn, nameColumn, skillColumn, callSignsColumn, unitColumn, xColumn, yColumn, altColumn, headingColumn, speedColumn, viewColumn);
+        TableColumn<UnitDetails, Void> viewRadios = new TableColumn<>("Radio");
+        viewRadios.setCellFactory(createButtonCellFactory("View Radio",
+                getClass().getResource("RadioDetails.fxml"), this::viewRadioButtonClick));
+
+        TableColumn<UnitDetails, Void> viewDataLink = new TableColumn<>("DataLink");
+        viewDataLink.setCellFactory(createButtonCellFactory("View DataLink",
+                getClass().getResource("DataLinkDetails.fxml"), this::viewDataLinkButtonClick));
+
+        dataTable.getColumns().addAll(idColumn, nameColumn, skillColumn, callSignsColumn, unitColumn, xColumn, yColumn,
+                altColumn, headingColumn, speedColumn, viewPayload, viewRadios, viewDataLink);
 
         dataTable.setItems(routes);
         idColumn.setSortType(TableColumn.SortType.ASCENDING);
@@ -83,14 +97,16 @@ public class GroupDetailsController {
         dataTable.sort();
     }
 
-    private Callback<TableColumn<UnitDetails, Void>, TableCell<UnitDetails, Void>> createButtonCellFactory() {
+    private Callback<TableColumn<UnitDetails, Void>, TableCell<UnitDetails, Void>> createButtonCellFactory(
+            String buttonName, URL resource,
+            BiConsumer<URL, UnitDetails> function) {
         return (param) -> new TableCell<>() {
-            private final Button viewButton = new Button("View Payload");
+            private final Button viewButton = new Button(buttonName);
 
             {
                 viewButton.setOnAction(event -> {
                     UnitDetails data = getTableView().getItems().get(getIndex());
-                    handleViewButtonClick(data);
+                    function.accept(resource, data);
                 });
             }
 
@@ -106,9 +122,9 @@ public class GroupDetailsController {
         };
     }
 
-    private void handleViewButtonClick(UnitDetails data) {
+    private void viewPayloadButtonClick(URL resource, UnitDetails data) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("PayloadDetails.fxml"));
+            FXMLLoader loader = new FXMLLoader(resource);
             Parent root = loader.load();
 
             UnitPayload unitPayload = UnitPayload.fromLuaGroup(data.getLuaUnit());
@@ -119,6 +135,57 @@ public class GroupDetailsController {
             stage.setTitle("Payload for " + data.getName());
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(new Scene(root, 800, 600));
+            App.addIcons(stage);
+            stage.showAndWait();
+        } catch (IOException e) {
+            log.error("Error loading payload", e);
+            MessageUtils.showError("Error!", "Error loading payload. Check logs for more info.");
+        }
+    }
+
+    private void viewRadioButtonClick(URL resource, UnitDetails data) {
+        try {
+            FXMLLoader loader = new FXMLLoader(resource);
+            Parent root = loader.load();
+
+            UnitRadio unitRadio = UnitRadio.fromLuaGroup(data.getLuaUnit());
+            if (unitRadio == null) {
+                MessageUtils.showWarn("NO DATA", "Unit has no configured radio channels");
+                return;
+            }
+            RadioController detailsController = loader.getController();
+            detailsController.initialize(unitRadio);
+
+            Stage stage = new Stage();
+            stage.setTitle("Radio for " + data.getName());
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(new Scene(root, 800, 600));
+            App.addIcons(stage);
+            stage.showAndWait();
+        } catch (IOException e) {
+            log.error("Error loading payload", e);
+            MessageUtils.showError("Error!", "Error loading payload. Check logs for more info.");
+        }
+    }
+
+    private void viewDataLinkButtonClick(URL resource, UnitDetails data) {
+        try {
+            FXMLLoader loader = new FXMLLoader(resource);
+            Parent root = loader.load();
+
+            UnitDataLink unitDataLink = UnitDataLink.fromLuaGroup(data.getLuaUnit());
+            if (unitDataLink == null) {
+                MessageUtils.showWarn("NO DATA", "Unit has no configured data link");
+                return;
+            }
+            DataLinkController detailsController = loader.getController();
+            detailsController.initialize(unitDataLink);
+
+            Stage stage = new Stage();
+            stage.setTitle("Radio for " + data.getName());
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(new Scene(root, 800, 600));
+            App.addIcons(stage);
             stage.showAndWait();
         } catch (IOException e) {
             log.error("Error loading payload", e);

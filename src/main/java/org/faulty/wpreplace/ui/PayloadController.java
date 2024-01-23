@@ -44,6 +44,5 @@ public class PayloadController {
     public static final class Item {
         private final String type;
         private final int quantity;
-
     }
 }

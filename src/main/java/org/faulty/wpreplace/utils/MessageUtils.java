@@ -13,6 +13,9 @@ public class MessageUtils {
     public static void showError(String title, String message) {
         showMessage(Alert.AlertType.ERROR, title, message);
     }
+    public static void showWarn(String title, String message) {
+        showMessage(Alert.AlertType.WARNING, title, message);
+    }
 
     private static void showMessage(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);
