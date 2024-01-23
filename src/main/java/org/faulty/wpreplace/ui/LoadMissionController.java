@@ -7,8 +7,10 @@ import javafx.scene.Scene;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import lombok.extern.log4j.Log4j2;
 import org.faulty.wpreplace.models.Error;
 import org.faulty.wpreplace.services.MissionMizService;
+import org.faulty.wpreplace.utils.MessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.stereotype.Component;
@@ -16,11 +18,12 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 
+@Log4j2
 @Component
 public class LoadMissionController {
 
     @Autowired
-    private AbstractApplicationContext context ;
+    private AbstractApplicationContext context;
     @Autowired
     private MissionMizService missionMizService;
     @FXML
@@ -30,11 +33,12 @@ public class LoadMissionController {
     protected void loadFileAndContinue() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose a Mission File");
+        FileChooser.ExtensionFilter mizFilter = new FileChooser.ExtensionFilter("Miz Files (*.miz)", "*.miz");
+        fileChooser.getExtensionFilters().add(mizFilter);
         File selectedFile = fileChooser.showOpenDialog(new Stage());
-
         if (selectedFile != null) {
             // File is selected, perform your logic here
-            Error error =  missionMizService.loadMission(selectedFile.getPath());
+            Error error = missionMizService.loadMission(selectedFile.getPath());
             if (error == null) {
                 loadSelectRoute();
             } else {
@@ -47,19 +51,20 @@ public class LoadMissionController {
 
     private void loadSelectRoute() {
         try {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("LoadGroup.fxml"));
-        loader.setControllerFactory(context::getBean);
-        Parent root = loader.load();
-        Stage stage = new Stage();
-        stage.setTitle("Source Details");
-        stage.setScene(new Scene(root, 800, 600));
-        Stage currentStage = (Stage) messageText.getScene().getWindow();
-        App.addIcons(stage);
-        currentStage.hide();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("LoadGroup.fxml"));
+            loader.setControllerFactory(context::getBean);
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Source Details");
+            stage.setScene(new Scene(root, 1024, 768));
+            Stage currentStage = (Stage) messageText.getScene().getWindow();
+            App.addIcons(stage);
+            currentStage.hide();
 
-        stage.show();
+            stage.show();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            MessageUtils.showError("Error loading tab", "Check logs for more details");
+            log.error("Error loading route data tab", e);
         }
     }
 }

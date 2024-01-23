@@ -17,10 +17,10 @@ Before running the application, ensure that you have the following:
 To run the application, use the following command:
 
 ```bash
-java -jar waypoint-replace-0.0.10.jar
+java -jar waypoint-replace-0.0.12.jar
 ```
 <b> Note! <br/>
-* Replace 0.0.10 with the actual version downloaded
+* Replace 0.0.12 with the actual version downloaded
 </b>
 
 

@@ -3,13 +3,11 @@ package org.faulty.wpreplace.ui;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import lombok.extern.log4j.Log4j2;
 import org.faulty.wpreplace.models.Entry;
 import org.faulty.wpreplace.models.Error;
 import org.faulty.wpreplace.services.MissionMizService;
@@ -25,6 +23,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 
+@Log4j2
 @Component
 public class LoadGroupController {
     @Autowired
@@ -33,7 +32,8 @@ public class LoadGroupController {
     private RouteContext routeContext;
     @Autowired
     private MissionMizService missionContext;
-
+    @FXML
+    public TabPane tabPane;
     // coalition
     public RadioButton blueRadioButton;
     public RadioButton redRadioButton;
@@ -208,23 +208,27 @@ public class LoadGroupController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("RouteDetails.fxml"));
             loader.setControllerFactory(context::getBean);
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("Route Details for " + routeContext.printDetails());
-            stage.setScene(new Scene(root, 800, 600));
-            stage.show();
+            Parent routePane = loader.load();
+            Tab tab = new Tab("Route " + routeContext.printDetails());
+            tab.setContent(routePane);
+            tabPane.getTabs().add(tab);
+            tabPane.getSelectionModel().select(tab);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            MessageUtils.showError("Error loading tab", "Check logs for more details");
+            log.error("Error loading route data tab", e);
         }
     }
 
     public void saveData() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose a Mission File");
-        File selectedFile = fileChooser.showOpenDialog(new Stage());
+        fileChooser.setInitialFileName("newMission.miz");
+        fileChooser.setInitialDirectory(new File(missionContext.getMizFilePath()).getParentFile());
+        FileChooser.ExtensionFilter mizFilter = new FileChooser.ExtensionFilter("Miz Files (*.miz)", "*.miz");
+        fileChooser.getExtensionFilters().add(mizFilter);
+        File selectedFile = fileChooser.showSaveDialog(new Stage());
 
         if (selectedFile != null) {
-            // File is selected, perform your logic here
             String path = selectedFile.getPath();
             Error error = missionContext.saveMission(path);
             if (error == null) {
@@ -241,20 +245,21 @@ public class LoadGroupController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("GroupDetails.fxml"));
             loader.setControllerFactory(context::getBean);
-            Parent root = loader.load();
+            AnchorPane groupPane = loader.load();
             GroupDetailsController groupDetailsController = loader.getController();
             String coalition = ((RadioButton) coalitionToggleGroup.getSelectedToggle()).getUserData().toString();
             int countryId = countryIdListView.getSelectionModel().getSelectedItem().getLocation();
             String unitType = ((RadioButton) unitTypeToggleGroup.getSelectedToggle()).getUserData().toString();
             int groupId = groupIdListView.getSelectionModel().getSelectedItem();
             groupDetailsController.setGroup(coalition, countryId, unitType, groupId);
-            Stage stage = new Stage();
-            stage.setTitle("Group Details");
-            stage.setScene(new Scene(root, 1024, 600));
-            App.addIcons(stage);
-            stage.show();
+
+            Tab tab = new Tab("Group Details #" + groupId);
+            tab.setContent(groupPane);
+            tabPane.getTabs().add(tab);
+            tabPane.getSelectionModel().select(tab);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            MessageUtils.showError("Error loading tab", "Check logs for more details");
+            log.error("Error loading route data tab", e);
         }
     }
 }

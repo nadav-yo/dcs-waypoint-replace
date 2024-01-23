@@ -16,7 +16,7 @@ import java.util.zip.ZipOutputStream;
 public class ZipUtils {
 
     public static void copyEntry(ZipEntry entry, ZipOutputStream zipOutputStream, ZipInputStream zipInputStream) throws IOException {
-        log.info("Copying file {}", entry.getName());
+        log.debug("Copying file {}", entry.getName());
         zipOutputStream.putNextEntry(entry);
         IOUtils.copy(zipInputStream, zipOutputStream);
         zipOutputStream.closeEntry();
@@ -24,7 +24,7 @@ public class ZipUtils {
 
     public static void writeModifiedMissionEntry(LuaValue missionObject, ZipOutputStream zipOutputStream) throws IOException {
         String missionStr = "mission = \n" + LuaWriter.luaTableToString(missionObject.checktable());
-        log.info("|--- Writing modified mission file");
+        log.debug("Writing modified mission file");
         ZipEntry entry = new ZipEntry("mission");
         zipOutputStream.putNextEntry(entry);
         zipOutputStream.write(missionStr.getBytes());
