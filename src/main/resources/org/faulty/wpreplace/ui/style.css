@@ -1,0 +1,13 @@
+.button-styled {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-border-color: white;
+    -fx-border-width: 2px;
+    -fx-border-radius: 5px;
+}
+
+.button-styled:pressed {
+    -fx-border-color: gray;
+}

@@ -22,7 +22,7 @@ public class App extends Application {
     public void start(Stage primaryStage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("LoadMission.fxml"));
         fxmlLoader.setControllerFactory(context::getBean);
-        Scene scene = new Scene(fxmlLoader.load(), 320, 240);
+        Scene scene = new Scene(fxmlLoader.load(), 320, 320);
         primaryStage.setTitle("Select Source Mission");
         primaryStage.setScene(scene);
         addIcons(primaryStage);

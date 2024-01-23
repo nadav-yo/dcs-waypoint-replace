@@ -4,7 +4,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import lombok.extern.log4j.Log4j2;
@@ -26,8 +25,6 @@ public class LoadMissionController {
     private AbstractApplicationContext context;
     @Autowired
     private MissionMizService missionMizService;
-    @FXML
-    private Text messageText;
 
     @FXML
     protected void loadFileAndContinue() {
@@ -42,10 +39,8 @@ public class LoadMissionController {
             if (error == null) {
                 loadSelectRoute();
             } else {
-                messageText.setText("Failed to process the file - " + error.message());
+                MessageUtils.showError("Error Loading Mission", "Failed to process the file\n" + error.message());
             }
-        } else {
-            messageText.setText("No file selected.");
         }
     }
 
@@ -55,12 +50,9 @@ public class LoadMissionController {
             loader.setControllerFactory(context::getBean);
             Parent root = loader.load();
             Stage stage = new Stage();
-            stage.setTitle("Source Details");
+            stage.setTitle("Mission Details " + missionMizService.getMizFilePath());
             stage.setScene(new Scene(root, 1024, 768));
-            Stage currentStage = (Stage) messageText.getScene().getWindow();
             App.addIcons(stage);
-            currentStage.hide();
-
             stage.show();
         } catch (IOException e) {
             MessageUtils.showError("Error loading tab", "Check logs for more details");
