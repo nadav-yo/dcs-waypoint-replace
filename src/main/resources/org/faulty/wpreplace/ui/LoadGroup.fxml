@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
 <StackPane  xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="org.faulty.wpreplace.ui.LoadGroupController">
+           fx:controller="org.faulty.wpreplace.ui.MissionDetailsController">
     <TabPane fx:id="tabPane" tabClosingPolicy="ALL_TABS">
         <Tab text="Groups Data" closable="false">
             <VBox alignment="CENTER" spacing="10">

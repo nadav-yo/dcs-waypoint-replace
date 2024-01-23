@@ -4,8 +4,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
 import org.faulty.wpreplace.models.Entry;
-import org.faulty.wpreplace.services.MissionMizService;
-import org.faulty.wpreplace.services.RouteContext;
+import org.faulty.wpreplace.services.MissionService;
+import org.faulty.wpreplace.services.RouteService;
 import org.faulty.wpreplace.utils.MessageUtils;
 import org.faulty.wpreplace.utils.RouteUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
 @Component
 public class CopyRouteController {
     @Autowired
-    private RouteContext routeContext;
+    private RouteService routeService;
     @Autowired
-    private MissionMizService missionContext;
+    private MissionService missionContext;
 
     @FXML
     public Text routeDetails;
@@ -49,7 +49,7 @@ public class CopyRouteController {
         initCountryList();
         initUnitType();
         initGroupIds();
-        routeDetails.setText("Source: " + routeContext.printDetails());
+        routeDetails.setText("Source: " + routeService.printDetails());
         selectBlueCoalition();
     }
 
@@ -109,7 +109,7 @@ public class CopyRouteController {
         int countryId = countryIdListView.getSelectionModel().getSelectedItem().getLocation();
         List<Integer> groupIds = groupIdListView.getSelectionModel().getSelectedItems();
         String unitType = ((RadioButton) unitTypeToggleGroup.getSelectedToggle()).getUserData().toString();
-        groupIds.forEach(group -> RouteUtils.setRoute(missionContext.getMission(), routeContext.getRoute(),
+        groupIds.forEach(group -> RouteUtils.setRoute(missionContext.getMission(), routeService.getRoute(),
                 coalition, countryId, unitType));
         String groups = groupIds.stream().map(String::valueOf).collect(Collectors.joining(","));
         String msg = String.format("Route set for coalition %s, country %d, unit '%s' with groups %s", coalition, countryId, unitType, groups);

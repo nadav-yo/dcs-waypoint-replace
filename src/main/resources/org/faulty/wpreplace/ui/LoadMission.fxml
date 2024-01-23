@@ -9,7 +9,7 @@
            fx:controller="org.faulty.wpreplace.ui.LoadMissionController"
            stylesheets="@/org/faulty/wpreplace/ui/style.css">
     <ImageView>
-        <Image url="/org/faulty/wpreplace/ui/logo.jpg" requestedHeight="300" preserveRatio="true"/>
+        <Image url="/org/faulty/wpreplace/ui/icons/logo.jpg" requestedHeight="300" preserveRatio="true"/>
     </ImageView>
 
     <HBox alignment="BOTTOM_CENTER" spacing="120">

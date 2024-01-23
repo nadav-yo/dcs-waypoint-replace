@@ -8,7 +8,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import lombok.extern.log4j.Log4j2;
 import org.faulty.wpreplace.models.Error;
-import org.faulty.wpreplace.services.MissionMizService;
+import org.faulty.wpreplace.services.MissionService;
 import org.faulty.wpreplace.utils.MessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.AbstractApplicationContext;
@@ -24,7 +24,7 @@ public class LoadMissionController {
     @Autowired
     private AbstractApplicationContext context;
     @Autowired
-    private MissionMizService missionMizService;
+    private MissionService missionService;
 
     @FXML
     protected void loadFileAndContinue() {
@@ -35,7 +35,7 @@ public class LoadMissionController {
         File selectedFile = fileChooser.showOpenDialog(new Stage());
         if (selectedFile != null) {
             // File is selected, perform your logic here
-            Error error = missionMizService.loadMission(selectedFile.getPath());
+            Error error = missionService.loadMission(selectedFile.getPath());
             if (error == null) {
                 loadSelectRoute();
             } else {
@@ -50,7 +50,7 @@ public class LoadMissionController {
             loader.setControllerFactory(context::getBean);
             Parent root = loader.load();
             Stage stage = new Stage();
-            stage.setTitle("Mission Details " + missionMizService.getMizFilePath());
+            stage.setTitle("Mission Details " + missionService.getMizFilePath());
             stage.setScene(new Scene(root, 1024, 768));
             App.addIcons(stage);
             stage.show();

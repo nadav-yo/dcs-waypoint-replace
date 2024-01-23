@@ -2,16 +2,14 @@ package org.faulty.wpreplace.ui;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import lombok.extern.log4j.Log4j2;
 import org.faulty.wpreplace.models.Entry;
 import org.faulty.wpreplace.models.Error;
-import org.faulty.wpreplace.services.MissionMizService;
-import org.faulty.wpreplace.services.RouteContext;
+import org.faulty.wpreplace.services.MissionService;
+import org.faulty.wpreplace.services.RouteService;
 import org.faulty.wpreplace.utils.MessageUtils;
 import org.faulty.wpreplace.utils.RouteUtils;
 import org.luaj.vm2.LuaTable;
@@ -25,13 +23,13 @@ import java.io.IOException;
 
 @Log4j2
 @Component
-public class LoadGroupController {
+public class MissionDetailsController {
     @Autowired
     private AbstractApplicationContext context;
     @Autowired
-    private RouteContext routeContext;
+    private RouteService routeService;
     @Autowired
-    private MissionMizService missionContext;
+    private MissionService missionContext;
     @FXML
     public TabPane tabPane;
     // coalition
@@ -59,6 +57,7 @@ public class LoadGroupController {
     public Button saveButton;
 
     public void initialize() {
+        loadMissionDetails();
         initCoalition();
         initCountryList();
         initUnitType();
@@ -130,7 +129,7 @@ public class LoadGroupController {
             MessageUtils.showError("Error!", "Group not found!");
         } else {
             LuaValue route = groups.get(groupId).get("route");
-            routeContext.setRoute(route, coalition, countryId, unitType, groupId);
+            routeService.setRoute(route, coalition, countryId, unitType, groupId);
             saveButton.setDisable(false);
             loadRouteData();
         }
@@ -208,8 +207,8 @@ public class LoadGroupController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("RouteDetails.fxml"));
             loader.setControllerFactory(context::getBean);
-            Parent routePane = loader.load();
-            Tab tab = new Tab("Route " + routeContext.printDetails());
+            SplitPane routePane = loader.load();
+            Tab tab = new Tab("Route " + routeService.printDetails());
             tab.setContent(routePane);
             tabPane.getTabs().add(tab);
             tabPane.getSelectionModel().select(tab);
@@ -245,7 +244,7 @@ public class LoadGroupController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("GroupDetails.fxml"));
             loader.setControllerFactory(context::getBean);
-            AnchorPane groupPane = loader.load();
+            SplitPane groupPane = loader.load();
             GroupDetailsController groupDetailsController = loader.getController();
             String coalition = ((RadioButton) coalitionToggleGroup.getSelectedToggle()).getUserData().toString();
             int countryId = countryIdListView.getSelectionModel().getSelectedItem().getLocation();
@@ -260,6 +259,21 @@ public class LoadGroupController {
         } catch (IOException e) {
             MessageUtils.showError("Error loading tab", "Check logs for more details");
             log.error("Error loading route data tab", e);
+        }
+    }
+
+    public void loadMissionDetails() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("GeneralMissionDetails.fxml"));
+            loader.setControllerFactory(context::getBean);
+            SplitPane groupPane = loader.load();
+            Tab tab = new Tab("Mission Details");
+            tab.setContent(groupPane);
+            tab.setClosable(false);
+            tabPane.getTabs().add(tab);
+        } catch (IOException e) {
+            MessageUtils.showError("Error loading tab", "Check logs for more details");
+            log.error("Error loading mission details tab", e);
         }
     }
 }

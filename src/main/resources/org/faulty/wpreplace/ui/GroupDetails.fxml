@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.faulty.wpreplace.ui.GroupDetailsController">
-    <Text fx:id="groupDetailText" text="Group details for "/>
-    <TableView fx:id="dataTable"/>
-</AnchorPane>
+<SplitPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="org.faulty.wpreplace.ui.GroupDetailsController">
+    <VBox spacing="10">
+        <Text fx:id="groupDetailText" text="Group details for "/>
+        <TableView fx:id="dataTable"/>
+    </VBox>
+</SplitPane>

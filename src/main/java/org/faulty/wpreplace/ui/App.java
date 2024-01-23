@@ -30,9 +30,9 @@ public class App extends Application {
     }
 
     public static void addIcons(Stage stage) {
-        stage.getIcons().add(new Image("/org/faulty/wpreplace/ui/icon256.ico"));
-        stage.getIcons().add(new Image("/org/faulty/wpreplace/ui/icon48.png"));
-        stage.getIcons().add(new Image("/org/faulty/wpreplace/ui/icon32.png"));
+        stage.getIcons().add(new Image("/org/faulty/wpreplace/ui/icons/icon256.ico"));
+        stage.getIcons().add(new Image("/org/faulty/wpreplace/ui/icons/icon48.png"));
+        stage.getIcons().add(new Image("/org/faulty/wpreplace/ui/icons/icon32.png"));
     }
 
 

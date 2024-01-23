@@ -20,7 +20,7 @@ import org.faulty.wpreplace.models.UnitDataLink;
 import org.faulty.wpreplace.models.UnitDetails;
 import org.faulty.wpreplace.models.UnitPayload;
 import org.faulty.wpreplace.models.UnitRadio;
-import org.faulty.wpreplace.services.MissionMizService;
+import org.faulty.wpreplace.services.MissionService;
 import org.faulty.wpreplace.utils.MessageUtils;
 import org.faulty.wpreplace.utils.RouteUtils;
 import org.luaj.vm2.LuaTable;
@@ -36,7 +36,7 @@ import java.util.function.BiConsumer;
 @Component
 public class GroupDetailsController {
     @Autowired
-    private MissionMizService missionMizService;
+    private MissionService missionService;
     @FXML
     public Text groupDetailText;
     @FXML
@@ -47,11 +47,15 @@ public class GroupDetailsController {
     }
 
     public void setGroup(String coalition, int countryId, String unitType, int groupId) {
-        LuaTable group = RouteUtils.getGroup(missionMizService.getMission(), coalition, countryId, unitType, groupId);
+        LuaTable group = RouteUtils.getGroup(missionService.getMission(), coalition, countryId, unitType, groupId);
         if (group == null) {
             MessageUtils.showError("Error!", "Unable to load group");
             return;
         }
+        initUnitTable(coalition, countryId, unitType, groupId, group);
+    }
+
+    private void initUnitTable(String coalition, int countryId, String unitType, int groupId, LuaTable group) {
         groupDetailText.setText(String.format("Showing Group info for: coalition %s, country %d, unitType %s group %d ",
                 coalition, countryId, unitType, groupId));
         ObservableList<UnitDetails> routes = FXCollections.observableArrayList(UnitDetails.fromLuaGroup(group));

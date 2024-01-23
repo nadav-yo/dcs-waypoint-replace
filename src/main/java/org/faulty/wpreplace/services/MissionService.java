@@ -20,7 +20,7 @@ import java.util.zip.ZipOutputStream;
 @Log4j2
 @Getter
 @Component
-public class MissionMizService {
+public class MissionService {
 
     LuaValue mission;
     String mizFilePath;

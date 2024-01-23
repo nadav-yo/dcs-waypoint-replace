@@ -1,7 +1,7 @@
 package org.faulty.wpreplace.services;
 
 import lombok.Getter;
-import org.faulty.wpreplace.models.SlimRoute;
+import org.faulty.wpreplace.models.RouteDetails;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.springframework.stereotype.Component;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class RouteContext {
+public class RouteService {
 
     @Getter
     LuaValue route;
@@ -30,8 +30,8 @@ public class RouteContext {
         return String.format("coalition %s, country %d, unitType %s group %d ", coalition, countryId, unitType, groupId);
     }
 
-    public void updateRoute(List<SlimRoute> items) {
-        SlimRoute last = null;
+    public void updateRoute(List<RouteDetails> items) {
+        RouteDetails last = null;
         LuaTable points = route.get("points").checktable();
         items.forEach(item -> {
             LuaValue luaValue = points.get(item.getId());

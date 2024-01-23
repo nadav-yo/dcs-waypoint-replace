@@ -10,8 +10,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
-import org.faulty.wpreplace.models.SlimRoute;
-import org.faulty.wpreplace.services.RouteContext;
+import org.faulty.wpreplace.models.RouteDetails;
+import org.faulty.wpreplace.services.RouteService;
 import org.luaj.vm2.LuaTable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.AbstractApplicationContext;
@@ -24,51 +24,59 @@ public class RouteDetailsController {
     @Autowired
     private AbstractApplicationContext context;
     @Autowired
-    private RouteContext routeContext;
+    private RouteService routeService;
     @FXML
-    private TableView<SlimRoute> dataTable;
+    private TableView<RouteDetails> dataTable;
 
     public void initialize() {
-        LuaTable route = routeContext.getRoute().get("points").checktable();
-        ObservableList<SlimRoute> routes = FXCollections.observableArrayList(SlimRoute.fromLuaRoute(route));
+        LuaTable route = routeService.getRoute().get("points").checktable();
+        ObservableList<RouteDetails> routes = FXCollections.observableArrayList(RouteDetails.fromLuaRoute(route));
 
-        TableColumn<SlimRoute, Integer> idColumn = new TableColumn<>("ID");
+        TableColumn<RouteDetails, Integer> idColumn = new TableColumn<>("ID");
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         idColumn.setEditable(false);
 
-        TableColumn<SlimRoute, Double> xColumn = new TableColumn<>("X");
+        TableColumn<RouteDetails, Double> xColumn = new TableColumn<>("X");
         xColumn.setCellValueFactory(new PropertyValueFactory<>("x"));
         xColumn.setOnEditCommit(event -> {
-            SlimRoute editRoute = event.getRowValue();
+            RouteDetails editRoute = event.getRowValue();
             editRoute.setX(event.getNewValue());
         });
 
-        TableColumn<SlimRoute, Double> yColumn = new TableColumn<>("Y");
+        TableColumn<RouteDetails, Double> yColumn = new TableColumn<>("Y");
         yColumn.setCellValueFactory(new PropertyValueFactory<>("y"));
         yColumn.setOnEditCommit(event -> {
-            SlimRoute editRoute = event.getRowValue();
+            RouteDetails editRoute = event.getRowValue();
             editRoute.setY(event.getNewValue());
         });
 
-        TableColumn<SlimRoute, Integer> altColumn = new TableColumn<>("Alt");
+        TableColumn<RouteDetails, Integer> altColumn = new TableColumn<>("Alt");
         altColumn.setCellValueFactory(new PropertyValueFactory<>("alt"));
         altColumn.setOnEditCommit(event -> {
-            SlimRoute editRoute = event.getRowValue();
+            RouteDetails editRoute = event.getRowValue();
             editRoute.setAlt(event.getNewValue());
         });
 
-        TableColumn<SlimRoute, Double> speedColumn = new TableColumn<>("Speed");
+        TableColumn<RouteDetails, Double> speedColumn = new TableColumn<>("Speed");
         speedColumn.setCellValueFactory(new PropertyValueFactory<>("speed"));
         speedColumn.setOnEditCommit(event -> {
-            SlimRoute editRoute = event.getRowValue();
+            RouteDetails editRoute = event.getRowValue();
             editRoute.setSpeed(event.getNewValue());
         });
 
-        TableColumn<SlimRoute, Double> etaColumn = new TableColumn<>("ETA");
+        TableColumn<RouteDetails, Double> etaColumn = new TableColumn<>("ETA");
         etaColumn.setCellValueFactory(new PropertyValueFactory<>("eta"));
         etaColumn.setEditable(false);
 
-        dataTable.getColumns().addAll(idColumn, xColumn, yColumn, altColumn, speedColumn, etaColumn);
+        TableColumn<RouteDetails, String> typeColumn = new TableColumn<>("Type");
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
+        typeColumn.setEditable(false);
+
+        TableColumn<RouteDetails, String> taskColumn = new TableColumn<>("Task");
+        taskColumn.setCellValueFactory(new PropertyValueFactory<>("task"));
+        taskColumn.setEditable(false);
+
+        dataTable.getColumns().addAll(idColumn, xColumn, yColumn, altColumn, speedColumn, etaColumn, typeColumn, taskColumn);
         dataTable.setEditable(true);
 
         dataTable.setItems(routes);
@@ -78,7 +86,7 @@ public class RouteDetailsController {
     }
 
     public void saveChanges() {
-        routeContext.updateRoute(dataTable.getItems());
+        routeService.updateRoute(dataTable.getItems());
     }
 
     public void copyRoute() {
