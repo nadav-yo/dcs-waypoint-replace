@@ -10,8 +10,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
-import org.faulty.wpreplace.services.RouteContext;
 import org.faulty.wpreplace.models.SlimRoute;
+import org.faulty.wpreplace.services.RouteContext;
 import org.luaj.vm2.LuaTable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.AbstractApplicationContext;
@@ -30,24 +30,55 @@ public class RouteDetailsController {
 
     public void initialize() {
         LuaTable route = routeContext.getRoute().get("points").checktable();
-        ObservableList<SlimRoute> routes = FXCollections.observableArrayList(SlimRoute.fromLuaRuote(route));
+        ObservableList<SlimRoute> routes = FXCollections.observableArrayList(SlimRoute.fromLuaRoute(route));
+
         TableColumn<SlimRoute, Integer> idColumn = new TableColumn<>("ID");
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        idColumn.setEditable(false);
 
-        TableColumn<SlimRoute, Float> xColumn = new TableColumn<>("X");
+        TableColumn<SlimRoute, Double> xColumn = new TableColumn<>("X");
         xColumn.setCellValueFactory(new PropertyValueFactory<>("x"));
+        xColumn.setOnEditCommit(event -> {
+            SlimRoute editRoute = event.getRowValue();
+            editRoute.setX(event.getNewValue());
+        });
 
-        TableColumn<SlimRoute, Float> yColumn = new TableColumn<>("Y");
+        TableColumn<SlimRoute, Double> yColumn = new TableColumn<>("Y");
         yColumn.setCellValueFactory(new PropertyValueFactory<>("y"));
+        yColumn.setOnEditCommit(event -> {
+            SlimRoute editRoute = event.getRowValue();
+            editRoute.setY(event.getNewValue());
+        });
 
         TableColumn<SlimRoute, Integer> altColumn = new TableColumn<>("Alt");
         altColumn.setCellValueFactory(new PropertyValueFactory<>("alt"));
-        dataTable.getColumns().addAll(idColumn, xColumn, yColumn, altColumn);
+        altColumn.setOnEditCommit(event -> {
+            SlimRoute editRoute = event.getRowValue();
+            editRoute.setAlt(event.getNewValue());
+        });
+
+        TableColumn<SlimRoute, Double> speedColumn = new TableColumn<>("Speed");
+        speedColumn.setCellValueFactory(new PropertyValueFactory<>("speed"));
+        speedColumn.setOnEditCommit(event -> {
+            SlimRoute editRoute = event.getRowValue();
+            editRoute.setSpeed(event.getNewValue());
+        });
+
+        TableColumn<SlimRoute, Double> etaColumn = new TableColumn<>("ETA");
+        etaColumn.setCellValueFactory(new PropertyValueFactory<>("eta"));
+        etaColumn.setEditable(false);
+
+        dataTable.getColumns().addAll(idColumn, xColumn, yColumn, altColumn, speedColumn, etaColumn);
+        dataTable.setEditable(true);
 
         dataTable.setItems(routes);
         idColumn.setSortType(TableColumn.SortType.ASCENDING);
         dataTable.getSortOrder().add(idColumn);
         dataTable.sort();
+    }
+
+    public void saveChanges() {
+        routeContext.updateRoute(dataTable.getItems());
     }
 
     public void copyRoute() {

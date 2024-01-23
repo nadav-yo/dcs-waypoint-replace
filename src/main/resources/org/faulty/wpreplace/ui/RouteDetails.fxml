@@ -2,11 +2,15 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 <VBox xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.faulty.wpreplace.ui.RouteDetailsController">
     <Text text="Route Points"/>
     <TableView fx:id="dataTable"/>
-    <Button text="Copy Route" onAction="#copyRoute"/>
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="Save Changes" onAction="#saveChanges" disable="true"/>
+        <Button text="Copy Route" onAction="#copyRoute"/>
+    </HBox>
 </VBox>

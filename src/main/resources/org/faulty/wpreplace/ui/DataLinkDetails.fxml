@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Text?>
 <VBox xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.faulty.wpreplace.ui.DataLinkController">
     <HBox alignment="CENTER" spacing="10">
         <Label fx:id="typeLabel" alignment="CENTER"/>
     </HBox>
-    <Text fx:id="link16Details" text="Link 16 details"/>
+    <Label text="Settings" alignment="CENTER"/>
+    <TableView fx:id="settingsTable" prefHeight="150"/>
+    <Label text="Network" alignment="CENTER"/>
+    <Label text="Team Members" alignment="CENTER"/>
+    <TableView fx:id="teamMembersTable" prefHeight="150"/>
+    <Label text="Donors" alignment="CENTER"/>
+    <TableView fx:id="donorsTable" prefHeight="150"/>
 </VBox>
