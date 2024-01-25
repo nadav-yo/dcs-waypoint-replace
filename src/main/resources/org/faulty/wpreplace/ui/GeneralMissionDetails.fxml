@@ -13,7 +13,7 @@
             <Text fx:id="theatreText"/>
             <Text fx:id="dateText"/>
         </HBox>
-        <TableView fx:id="dataTable" prefHeight="180"/>
+        <TableView fx:id="dataTable" prefHeight="200"/>
         <TableView fx:id="windTable" prefHeight="100"/>
         <TableView fx:id="cloudsTable" prefHeight="160"/>
     </VBox>

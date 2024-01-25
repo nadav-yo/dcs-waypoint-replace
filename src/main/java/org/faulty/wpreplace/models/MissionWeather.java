@@ -14,6 +14,7 @@ public class MissionWeather {
     private final boolean enableFog;
     private final int fogThickness;
     private final int fogVisibility;
+    private final int visibilityDistance;
     private final int seasonTemperature;
     private final String name;
     private final List<Item> clouds;
@@ -25,6 +26,7 @@ public class MissionWeather {
                 weatherLua.get("enable_fog").toboolean(),
                 weatherLua.get("fog").get("thickness").toint(),
                 weatherLua.get("fog").get("visibility").toint(),
+                weatherLua.get("visibility").get("distance").toint(),
                 weatherLua.get("season").get("temperature").toint(),
                 weatherLua.get("name").tojstring(),
                 getClouds(weatherLua.get("clouds").checktable())

@@ -15,11 +15,11 @@ public final class RouteUtils {
     public static LuaTable getGroups(LuaValue missionObject, String coalition, int countryId, String unitType) {
         try {
             return missionObject
-                    .get("coalition").checktable()
-                    .get(coalition).checktable()
-                    .get("country").checktable()
-                    .get(countryId).checktable()
-                    .get(unitType).checktable()
+                    .get("coalition")
+                    .get(coalition)
+                    .get("country")
+                    .get(countryId)
+                    .get(unitType)
                     .get("group").checktable();
         } catch (Exception e) {
             return null;

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
@@ -11,9 +10,16 @@
     <VBox spacing="10">
         <Text text="Route Points" textAlignment="CENTER"/>
         <TableView fx:id="dataTable"/>
+
+        <ScrollPane fx:id="scrollPane" prefWidth="400" prefHeight="400" style="-fx-padding: 0;">
+            <Canvas fx:id="canvas" width="1500" height="1200"/>
+        </ScrollPane>
+
         <HBox spacing="10" alignment="CENTER">
             <Button text="Save Changes" onAction="#saveChanges" disable="true"/>
             <Button text="Copy Route" onAction="#copyRoute"/>
+            <Label fx:id="coordinatesLabel"/>
+            <CheckBox fx:id="showAll">Show all routes</CheckBox>
         </HBox>
     </VBox>
 </SplitPane>

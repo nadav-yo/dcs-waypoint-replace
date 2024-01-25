@@ -84,6 +84,7 @@ public class GeneralMissionDetailsController {
                 new MissionWeather.Item("Enable Fog", weather.isEnableFog()),
                 new MissionWeather.Item("Fog Thickness", weather.getFogThickness()),
                 new MissionWeather.Item("Fog Visibility", weather.getFogVisibility()),
+                new MissionWeather.Item("Visibility Distance", weather.getSeasonTemperature()),
                 new MissionWeather.Item("Season Temperature", weather.getSeasonTemperature())
         )));
     }
