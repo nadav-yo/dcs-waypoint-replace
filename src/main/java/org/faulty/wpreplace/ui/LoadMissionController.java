@@ -4,10 +4,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import lombok.extern.log4j.Log4j2;
 import org.faulty.wpreplace.models.Error;
+import org.faulty.wpreplace.services.ConfService;
 import org.faulty.wpreplace.services.MissionService;
 import org.faulty.wpreplace.utils.MessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,14 @@ public class LoadMissionController {
     private AbstractApplicationContext context;
     @Autowired
     private MissionService missionService;
+    @Autowired
+    private ConfService confService;
+
+    public void initialize() {
+        if (confService.getDcsDirectory() == null) {
+            selectDcsLocation();
+        }
+    }
 
     @FXML
     protected void loadFileAndContinue() {
@@ -57,6 +67,23 @@ public class LoadMissionController {
         } catch (IOException e) {
             MessageUtils.showError("Error loading tab", "Check logs for more details");
             log.error("Error loading route data tab", e);
+        }
+    }
+
+    public void selectDcsLocation() {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("Select DCS directory");
+        if (confService.getDcsDirectory() != null) {
+            directoryChooser.setInitialDirectory(new File(confService.getDcsDirectory()));
+        }
+        File selectedFile = directoryChooser.showDialog(new Stage());
+        if (selectedFile != null) {
+            Error error = confService.setDcsDirectory(selectedFile.getPath());
+            if (error == null) {
+                loadSelectRoute();
+            } else {
+                MessageUtils.showError("Error Loading Mission", "Failed to process the file\n" + error.message());
+            }
         }
     }
 }

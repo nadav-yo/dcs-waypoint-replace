@@ -9,6 +9,7 @@ import javafx.scene.text.Font;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import org.faulty.wpreplace.models.MapEntry;
 import org.faulty.wpreplace.models.RouteDetails;
 
 import java.util.ArrayList;
@@ -17,61 +18,49 @@ import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public final class RouteCanvasUtil {
-    public static void drawRoute(GraphicsContext gc, double totalW, double totalH, Map<Integer, List<RouteDetails>> routesList, int groupId) {
-        gc.setFill(Color.WHITE);
-        gc.fillRect(0, 0, totalW, totalH);
-
-        gc.setStroke(Color.BLACK);
-        gc.setLineWidth(2.0); // Adjust the border width as needed
-        gc.strokeRect(0, 0, totalW, totalH);
-
-
+    public static void drawRoute(GraphicsContext gc, MapEntry mapEntry, Map<Integer, List<RouteDetails>> routesList, int groupId) {
         for (var route : routesList.entrySet()) {
             if (!route.getValue().isEmpty()) {
-                RouteDraw routeDraw = getRouteDraw(route.getValue(), totalW, totalH, route.getKey() == groupId);
+                RouteDraw routeDraw = getRouteDraw(route.getValue(), mapEntry, route.getKey() == groupId);
                 routeDraw.lines.forEach(line -> RouteCanvasUtil.drawLine(gc, line));
                 routeDraw.dots.forEach(dot -> RouteCanvasUtil.drawDot(gc, dot));
                 routeDraw.labels.forEach(label -> RouteCanvasUtil.drawLabel(gc, label));
-                jumpTo(gc, routeDraw.firstDot.x, routeDraw.firstDot.y);
+                jumpTo(gc, mapEntry, routeDraw.firstX, routeDraw.firstY);
             }
         }
     }
 
-    private static RouteDraw getRouteDraw(List<RouteDetails> route, double totalW, double totalH, boolean isSelected) {
-        double xRatio = 1_000_000 / totalW;
-        double yRatio = 1_000_000 / totalH;
+    private static RouteDraw getRouteDraw(List<RouteDetails> route, MapEntry mapEntry, boolean isSelected) {
         List<Dot> dots = new ArrayList<>();
         List<Label> labels = new ArrayList<>();
         List<Line> lines = new ArrayList<>();
 
         RouteDetails prev = route.get(0);
-        double srcX = (prev.getX() + 500_000) / xRatio;
-        double srcY = (prev.getY() + 500_000) / yRatio;
-        Dot first = new Dot(srcX, srcY, isSelected ? Color.RED : Color.CORAL);
-        dots.add(first);
+        double srcX = (prev.getX() - mapEntry.getMinX()) / mapEntry.getRatio();
+        double srcY = mapEntry.getAdjustedHeight() - (prev.getY() - mapEntry.getMinY()) / mapEntry.getRatio();
+        dots.add(new Dot(srcX, srcY, isSelected ? Color.RED : Color.CORAL));
         labels.add(new Label(String.valueOf(prev.getId()), srcX, srcY, isSelected ? Color.BLACK : Color.CORAL));
         for (int i = 1; i < route.size(); i++) {
             RouteDetails curr = route.get(i);
-            double destX = (curr.getX() + 500_000) / xRatio;
-            double destY = (curr.getY() + 500_000) / yRatio;
+            double destX = (curr.getX() - mapEntry.getMinX()) / mapEntry.getRatio();
+            double destY = mapEntry.getAdjustedHeight() - (curr.getY() - mapEntry.getMinY()) / mapEntry.getRatio();
             lines.add(new Line(srcX, srcY, destX, destY, isSelected ? Color.BLUE : Color.YELLOWGREEN));
             Dot dot = new Dot(destX, destY, Color.RED);
             dots.add(dot);
-            addLabel(labels, new Label(String.valueOf(curr.getId()), destX, destY,  isSelected ? Color.BLACK : Color.CORAL));
-            if (curr.getId() == 1) {
-                first = dot;
-            }
+            addLabel(labels, new Label(String.valueOf(curr.getId()), destX, destY, isSelected ? Color.BLACK : Color.CORAL));
             srcX = destX;
             srcY = destY;
         }
-        return new RouteDraw(lines, dots, labels, first);
+        return new RouteDraw(lines, dots, labels, prev.getX(), prev.getY());
     }
 
-    public static void jumpTo(GraphicsContext gc, double x, double y) {
+    public static void jumpTo(GraphicsContext gc, MapEntry mapEntry, double x, double y) {
         Canvas canvas = gc.getCanvas();
         ScrollPane scrollPane = (ScrollPane) canvas.getUserData();
-        double hValue = (x - 0.5 * scrollPane.getViewportBounds().getWidth()) / (canvas.getWidth() - scrollPane.getViewportBounds().getWidth());
-        double vValue = (y - 0.5 * scrollPane.getViewportBounds().getHeight()) / (canvas.getHeight() - scrollPane.getViewportBounds().getHeight());
+        double mapX = (x - mapEntry.getMinX()) / mapEntry.getRatio();
+        double mapY = mapEntry.getAdjustedHeight() - (y - mapEntry.getMinY()) / mapEntry.getRatio();
+        double hValue = (mapX - 0.5 * scrollPane.getViewportBounds().getWidth()) / (canvas.getWidth() - scrollPane.getViewportBounds().getWidth());
+        double vValue = (mapY - 0.5 * scrollPane.getViewportBounds().getHeight()) / (canvas.getHeight() - scrollPane.getViewportBounds().getHeight());
         Platform.runLater(() -> {
             scrollPane.setHvalue(Math.max(0, Math.min(1, hValue)));
             scrollPane.setVvalue(Math.max(0, Math.min(1, vValue)));
@@ -120,7 +109,7 @@ public final class RouteCanvasUtil {
         private Color color;
     }
 
-    private record RouteDraw(List<Line> lines, List<Dot> dots, List<Label> labels, Dot firstDot) {
+    private record RouteDraw(List<Line> lines, List<Dot> dots, List<Label> labels, double firstX, double firstY) {
 
     }
 }

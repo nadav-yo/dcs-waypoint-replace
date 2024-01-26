@@ -7,6 +7,7 @@ import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Data
@@ -28,8 +29,8 @@ public final class RouteDetails {
             LuaValue luaValue = points.get(key);
             RouteDetails slimRoute = new RouteDetails(
                     key.toint(),
-                    luaValue.get("x").todouble(),
                     luaValue.get("y").todouble(),
+                    luaValue.get("x").todouble(),
                     luaValue.get("alt").toint(),
                     luaValue.get("speed").todouble(),
                     luaValue.get("ETA").todouble(),
@@ -38,6 +39,7 @@ public final class RouteDetails {
             );
             slimRoutes.add(slimRoute);
         }
+        slimRoutes.sort(Comparator.comparingInt(RouteDetails::getId));
         return slimRoutes;
     }
 

@@ -2,22 +2,27 @@
 
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Text?>
-<SplitPane xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<SplitPane xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="org.faulty.wpreplace.ui.RouteDetailsController">
     <VBox spacing="10">
-        <Text text="Route Points" textAlignment="CENTER"/>
-        <TableView fx:id="dataTable"/>
+        <Label text="Route Points" textAlignment="CENTER" maxHeight="20"/>
+        <SplitPane VBox.vgrow="ALWAYS" orientation="VERTICAL">
 
-        <ScrollPane fx:id="scrollPane" prefWidth="400" prefHeight="400" style="-fx-padding: 0;">
-            <Canvas fx:id="canvas" width="1500" height="1200"/>
-        </ScrollPane>
+            <TableView fx:id="dataTable" prefWidth="400.0"/>
 
-        <HBox spacing="10" alignment="CENTER">
-            <Button text="Save Changes" onAction="#saveChanges" disable="true"/>
-            <Button text="Copy Route" onAction="#copyRoute"/>
+            <ScrollPane fx:id="scrollPane" prefHeight="400" prefWidth="1024" style="-fx-padding: 0;">
+                <StackPane>
+                    <ImageView fx:id="mapImageView"/>
+                    <Canvas fx:id="canvas"/>
+                </StackPane>
+            </ScrollPane>
+        </SplitPane>
+
+        <HBox alignment="CENTER" spacing="10" maxHeight="20">
+            <Button disable="true" onAction="#saveChanges" text="Save Changes"/>
+            <Button onAction="#copyRoute" text="Copy Route"/>
             <Label fx:id="coordinatesLabel"/>
             <CheckBox fx:id="showAll">Show all routes</CheckBox>
         </HBox>

@@ -31,3 +31,4 @@ build/
 ### Mac OS ###
 .DS_Store
 spring-shell.log
+/wp.conf

@@ -10,8 +10,13 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.ScrollEvent;
 import javafx.stage.Stage;
+import org.faulty.wpreplace.models.MapEntry;
 import org.faulty.wpreplace.models.RouteDetails;
+import org.faulty.wpreplace.services.ConfService;
 import org.faulty.wpreplace.services.MissionService;
 import org.faulty.wpreplace.services.RouteService;
 import org.faulty.wpreplace.utils.RouteCanvasUtil;
@@ -20,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +33,12 @@ import java.util.stream.Collectors;
 
 @Component
 public class RouteDetailsController {
+    @FXML
+    public ImageView mapImageView;
     @Autowired
     private AbstractApplicationContext context;
+    @Autowired
+    private ConfService confService;
     @Autowired
     private RouteService routeService;
     @Autowired
@@ -43,27 +53,17 @@ public class RouteDetailsController {
     public CheckBox showAll;
     @FXML
     public Canvas canvas;
+    private boolean drawAllRouts;
 
     public void initialize() {
-        initRouteTable();
-        initCanvas();
-        initDrawAllCheckBox();
+        MapEntry mapEntry = new MapEntry(missionService.getMapName());
+        initRouteTable(mapEntry);
+        initScrollPane(mapEntry);
+        initCanvas(mapEntry);
+        initDrawAllCheckBox(mapEntry);
     }
 
-    private void initDrawAllCheckBox() {
-        showAll.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            GraphicsContext gc = canvas.getGraphicsContext2D();
-            if (newValue) {
-                drawAllRoutes(gc);
-            } else {
-                drawSingleRoute(gc);
-            }
-        });
-    }
-
-    private void initCanvas() {
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        // Set up scrolling
+    private void initScrollPane(MapEntry mapEntry) {
         scrollPane.setOnMousePressed(event -> {
             if (event.isMiddleButtonDown()) {
                 scrollPane.setPannable(true);
@@ -74,37 +74,75 @@ public class RouteDetailsController {
                 scrollPane.setPannable(false);
             }
         });
+        scrollPane.addEventFilter(ScrollEvent.ANY, event -> {
+            double deltaY = event.getDeltaY();
+            double scaleFactor = deltaY > 0 ? 1.1 : 0.9;
+            int ratio = (int)(mapEntry.getRatio() * scaleFactor);
+            mapEntry.setRatio(ratio);
+            initCanvas(mapEntry);
+            event.consume();
+        });
         canvas.setUserData(scrollPane);
 
         // Display mouse coordinates on hover
         coordinatesLabel.setStyle("-fx-background-color: white; -fx-padding: 5px;");
         coordinatesLabel.setMouseTransparent(true);
-        double xRatio = 1_000_000 / canvas.getWidth();
-        double yRatio = 1_000_000 / canvas.getHeight();
-        canvas.setOnMouseMoved(event -> {
-            double mouseX = event.getX() * xRatio - 500_000;
-            double mouseY = event.getY() * yRatio - 500_000;
 
-            coordinatesLabel.setText(String.format("X: %.2f, Y: %.2f, Zoom: %.2f", mouseX, mouseY, canvas.getScaleX()));
+        canvas.setOnMouseMoved(event -> {
+            double mouseX = (event.getX() * mapEntry.getRatio()) + mapEntry.getMinX();
+            double mouseY = (event.getY() * mapEntry.getRatio() + mapEntry.getMinY());
+
+            coordinatesLabel.setText(String.format("X: %.2f, Y: %.2f, Zoom: %d", mouseX, mouseY, mapEntry.getRatio()));
         });
-        drawSingleRoute(gc);
     }
 
-    private void drawAllRoutes(GraphicsContext gc) {
+
+    private void initCanvas(MapEntry mapEntry) {
+        canvas.setHeight(mapEntry.getAdjustedHeight());
+        canvas.setWidth(mapEntry.getAdjustedWidth());
+        mapImageView.setFitHeight(mapEntry.getAdjustedHeight());
+        mapImageView.setFitWidth(mapEntry.getAdjustedWidth());
+        mapImageView.setImage(new Image(new File(confService.getDcsDirectory() + mapEntry.getFilePath()).toURI().toString(),
+                mapEntry.getAdjustedWidth(), mapEntry.getAdjustedHeight(), true, true));
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
+        // Set up scrolling
+
+        if (drawAllRouts) {
+            drawAllRoutes(gc, mapEntry);
+        } else {
+            drawSingleRoute(gc, mapEntry);
+        }
+    }
+
+    private void initDrawAllCheckBox(MapEntry mapEntry) {
+        showAll.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            GraphicsContext gc = canvas.getGraphicsContext2D();
+            if (newValue) {
+                drawAllRouts = true;
+                drawAllRoutes(gc, mapEntry);
+            } else {
+                drawAllRouts = false;
+                drawSingleRoute(gc, mapEntry);
+            }
+        });
+    }
+
+    private void drawAllRoutes(GraphicsContext gc, MapEntry mapEntry) {
         int groupId = routeService.getGroupId();
         Map<Integer, LuaValue> friendlyGroupRoutes = routeService.getFriendlyGroupRoutes(missionService.getMission());
         Map<Integer, List<RouteDetails>> routes = friendlyGroupRoutes.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, r -> RouteDetails.fromLuaRoute(r.getValue().checktable())));
-        RouteCanvasUtil.drawRoute(gc, canvas.getWidth(), canvas.getHeight(), routes, groupId);
+        RouteCanvasUtil.drawRoute(gc, mapEntry, routes, groupId);
     }
 
-    private void drawSingleRoute(GraphicsContext gc) {
+    private void drawSingleRoute(GraphicsContext gc, MapEntry mapEntry) {
         List<RouteDetails> route = RouteDetails.fromLuaRoute(routeService.getRoute().get("points").checktable());
         int groupId = routeService.getGroupId();
-        RouteCanvasUtil.drawRoute(gc, canvas.getWidth(), canvas.getHeight(), Map.of(groupId, route), groupId);
+        RouteCanvasUtil.drawRoute(gc, mapEntry, Map.of(groupId, route), groupId);
     }
 
-    private void initRouteTable() {
+    private void initRouteTable(MapEntry mapEntry) {
         List<RouteDetails> route = RouteDetails.fromLuaRoute(routeService.getRoute().get("points").checktable());
         ObservableList<RouteDetails> routes = FXCollections.observableArrayList(route);
 
@@ -160,15 +198,13 @@ public class RouteDetailsController {
         dataTable.getSortOrder().add(idColumn);
         dataTable.sort();
 
-        double xRatio = 1_000_000 / canvas.getWidth();
-        double yRatio = 1_000_000 / canvas.getHeight();
         dataTable.setRowFactory(tv -> {
             javafx.scene.control.TableRow<RouteDetails> row = new javafx.scene.control.TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (!row.isEmpty() && event.getClickCount() == 1) {
-                    RouteCanvasUtil.jumpTo(canvas.getGraphicsContext2D(),
-                            (row.getItem().getX() + 500_000) / xRatio,
-                            (row.getItem().getY() + 500_000) / yRatio);
+                    RouteCanvasUtil.jumpTo(canvas.getGraphicsContext2D(), mapEntry,
+                            row.getItem().getX(),
+                            row.getItem().getY());
                 }
             });
             return row;

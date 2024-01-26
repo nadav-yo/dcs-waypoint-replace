@@ -45,6 +45,10 @@ public class MissionService {
         }
     }
 
+    public String getMapName() {
+        return mission.get("theatre").tojstring();
+    }
+
     public Error saveMission(String destFile) {
         try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(mizFilePath))) {
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(destFile))) {
