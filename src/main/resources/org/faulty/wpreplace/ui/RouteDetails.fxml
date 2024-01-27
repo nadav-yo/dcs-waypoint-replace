@@ -7,7 +7,15 @@
 <SplitPane xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="org.faulty.wpreplace.ui.RouteDetailsController">
     <VBox spacing="10">
-        <Label text="Route Points" textAlignment="CENTER" maxHeight="20"/>
+        <HBox maxHeight="20" spacing="200">
+            <HBox alignment="CENTER_LEFT">
+                <Label text="Route Points"/>
+            </HBox>
+            <HBox alignment="CENTER_RIGHT" spacing="20">
+                <Label text="Group"/>
+                <ComboBox fx:id="groupSelect" layoutX="50" layoutY="50"/>
+            </HBox>
+        </HBox>
         <SplitPane VBox.vgrow="ALWAYS" orientation="VERTICAL">
 
             <TableView fx:id="dataTable" prefWidth="400.0"/>

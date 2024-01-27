@@ -20,6 +20,7 @@ import org.faulty.wpreplace.services.ConfService;
 import org.faulty.wpreplace.services.MissionService;
 import org.faulty.wpreplace.services.RouteService;
 import org.faulty.wpreplace.utils.RouteCanvasUtil;
+import org.faulty.wpreplace.utils.RouteUtils;
 import org.luaj.vm2.LuaValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.AbstractApplicationContext;
@@ -33,8 +34,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class RouteDetailsController {
-    @FXML
-    public ImageView mapImageView;
     @Autowired
     private AbstractApplicationContext context;
     @Autowired
@@ -53,14 +52,34 @@ public class RouteDetailsController {
     public CheckBox showAll;
     @FXML
     public Canvas canvas;
+    @FXML
+    public ImageView mapImageView;
+    @FXML
+    public ComboBox<Integer> groupSelect;
+    private Map<Integer, List<RouteDetails>> allGroupRoutes;
     private boolean drawAllRouts;
 
     public void initialize() {
         MapEntry mapEntry = new MapEntry(missionService.getMapName());
-        initRouteTable(mapEntry);
+        setAllGroups();
+        initGroupSelect(mapEntry);
         initScrollPane(mapEntry);
         initCanvas(mapEntry);
+        initRouteTable(mapEntry);
         initDrawAllCheckBox(mapEntry);
+    }
+
+    private void setAllGroups() {
+        Map<Integer, LuaValue> friendlyGroupRoutes = routeService.getFriendlyGroupRoutes(missionService.getMission());
+        allGroupRoutes = friendlyGroupRoutes.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, r -> RouteDetails.fromLuaRoute(r.getValue().checktable())));
+    }
+
+    private void initGroupSelect(MapEntry mapEntry) {
+        groupSelect.getItems().addAll(RouteUtils.getSelectedGroupIds(missionService.getMission(),
+                routeService.getCoalition(), routeService.getCountryId(), routeService.getUnitType()));
+        groupSelect.setValue(routeService.getGroupId());
+        groupSelect.setOnAction(event -> setRouteDetails(mapEntry));
     }
 
     private void initScrollPane(MapEntry mapEntry) {
@@ -76,8 +95,8 @@ public class RouteDetailsController {
         });
         scrollPane.addEventFilter(ScrollEvent.ANY, event -> {
             double deltaY = event.getDeltaY();
-            double scaleFactor = deltaY > 0 ? 1.1 : 0.9;
-            int ratio = (int)(mapEntry.getRatio() * scaleFactor);
+            double scaleFactor = deltaY > 0 ? 0.9 : 1.1;
+            int ratio = (int) (mapEntry.getRatio() * scaleFactor);
             mapEntry.setRatio(ratio);
             initCanvas(mapEntry);
             event.consume();
@@ -108,6 +127,18 @@ public class RouteDetailsController {
         gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
         // Set up scrolling
 
+        drawRoutes(mapEntry, gc);
+    }
+
+    private void initDrawAllCheckBox(MapEntry mapEntry) {
+        showAll.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            GraphicsContext gc = canvas.getGraphicsContext2D();
+            drawAllRouts = newValue;
+            drawRoutes(mapEntry, gc);
+        });
+    }
+
+    private void drawRoutes(MapEntry mapEntry, GraphicsContext gc) {
         if (drawAllRouts) {
             drawAllRoutes(gc, mapEntry);
         } else {
@@ -115,37 +146,17 @@ public class RouteDetailsController {
         }
     }
 
-    private void initDrawAllCheckBox(MapEntry mapEntry) {
-        showAll.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            GraphicsContext gc = canvas.getGraphicsContext2D();
-            if (newValue) {
-                drawAllRouts = true;
-                drawAllRoutes(gc, mapEntry);
-            } else {
-                drawAllRouts = false;
-                drawSingleRoute(gc, mapEntry);
-            }
-        });
-    }
-
     private void drawAllRoutes(GraphicsContext gc, MapEntry mapEntry) {
-        int groupId = routeService.getGroupId();
-        Map<Integer, LuaValue> friendlyGroupRoutes = routeService.getFriendlyGroupRoutes(missionService.getMission());
-        Map<Integer, List<RouteDetails>> routes = friendlyGroupRoutes.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, r -> RouteDetails.fromLuaRoute(r.getValue().checktable())));
-        RouteCanvasUtil.drawRoute(gc, mapEntry, routes, groupId);
+        RouteCanvasUtil.drawRoute(gc, mapEntry, allGroupRoutes, groupSelect.getValue());
     }
 
     private void drawSingleRoute(GraphicsContext gc, MapEntry mapEntry) {
-        List<RouteDetails> route = RouteDetails.fromLuaRoute(routeService.getRoute().get("points").checktable());
-        int groupId = routeService.getGroupId();
+        int groupId = groupSelect.getValue();
+        List<RouteDetails> route = allGroupRoutes.get(groupId);
         RouteCanvasUtil.drawRoute(gc, mapEntry, Map.of(groupId, route), groupId);
     }
 
     private void initRouteTable(MapEntry mapEntry) {
-        List<RouteDetails> route = RouteDetails.fromLuaRoute(routeService.getRoute().get("points").checktable());
-        ObservableList<RouteDetails> routes = FXCollections.observableArrayList(route);
-
         TableColumn<RouteDetails, Integer> idColumn = new TableColumn<>("ID");
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         idColumn.setEditable(false);
@@ -193,7 +204,7 @@ public class RouteDetailsController {
         dataTable.getColumns().addAll(idColumn, xColumn, yColumn, altColumn, speedColumn, etaColumn, typeColumn, taskColumn);
         dataTable.setEditable(true);
 
-        dataTable.setItems(routes);
+        setRouteDetails(mapEntry);
         idColumn.setSortType(TableColumn.SortType.ASCENDING);
         dataTable.getSortOrder().add(idColumn);
         dataTable.sort();
@@ -209,6 +220,14 @@ public class RouteDetailsController {
             });
             return row;
         });
+    }
+
+    private void setRouteDetails(MapEntry mapEntry) {
+        List<RouteDetails> route = allGroupRoutes.get(groupSelect.getValue());
+        ObservableList<RouteDetails> routes = FXCollections.observableArrayList(route);
+        dataTable.getItems().clear();
+        dataTable.setItems(routes);
+        drawRoutes(mapEntry, canvas.getGraphicsContext2D());
     }
 
     public void saveChanges() {

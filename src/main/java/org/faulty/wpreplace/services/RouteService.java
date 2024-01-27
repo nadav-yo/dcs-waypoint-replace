@@ -11,15 +11,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Getter
 @Component
 public class RouteService {
 
-    @Getter
     LuaValue route;
     private String coalition;
     private int countryId;
     private String unitType;
-    @Getter
     private int groupId;
 
     public void setRoute(LuaValue route, String coalition, int countryId, String unitType, int groupId) {

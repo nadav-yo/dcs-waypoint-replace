@@ -208,7 +208,7 @@ public class MissionDetailsController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("RouteDetails.fxml"));
             loader.setControllerFactory(context::getBean);
             SplitPane routePane = loader.load();
-            Tab tab = new Tab("Route " + routeService.printDetails());
+            Tab tab = new Tab(String.format("Route coalition %s, country %d, unitType %s", routeService.getCoalition(), routeService.getCountryId(), routeService.getUnitType()));
             tab.setContent(routePane);
             tabPane.getTabs().add(tab);
             tabPane.getSelectionModel().select(tab);
